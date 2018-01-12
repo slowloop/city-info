@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ProgressIndicator?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="slowloop.Controller"
+            prefHeight="400.0" prefWidth="800.0" fx:id="bPane" onKeyPressed="#enterPressed" onMouseReleased="#deselect">
+    <top>
+        <VBox>
+            <HBox spacing="10" style="-fx-padding:10 0 10 10">
+                <TextField fx:id="city"/>
+                <TextField fx:id="country"/>
+                <Button fx:id="button" onAction="#searchButton" prefWidth="60" text="find" />
+            </HBox>
+
+            <GridPane prefHeight="140" alignment="CENTER" style="-fx-background-color: #336699;">
+                    <HBox GridPane.columnIndex="0" alignment="CENTER">
+                        <Text fx:id="title" textAlignment="CENTER"/>
+                    </HBox>
+                    <HBox GridPane.columnIndex="1" alignment="CENTER">
+                        <padding><Insets top="0" right="10" bottom="0" left="10"/></padding>
+                        <Rectangle fx:id="border" />
+                    </HBox>
+
+                    <HBox GridPane.columnIndex="2" alignment="CENTER" >
+                        <GridPane alignment="CENTER">
+                            <TextFlow prefWidth="260">
+                                <Text fx:id="description" style="-fx-font-size: 12px; -fx-fill: white"/>
+                            </TextFlow>
+                        </GridPane>
+                    </HBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane>
+
+        <GridPane alignment="BASELINE_CENTER" style="-fx-background-color: #336699;">
+            <padding><Insets top="30" right="0" bottom="0" left="0"/></padding>
+
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="TOP_LEFT">
+                    <TextFlow>
+                        <Text fx:id="tempTitle" style="-fx-fill: white" />
+                    </TextFlow>
+                    <Text fx:id="temp" style="-fx-fill: white" />
+                    <TextFlow>
+                        <padding><Insets top="-6" right="0" bottom="0" left="0"/></padding>
+                        <Text fx:id="tempDescr" style="-fx-fill: white; -fx-font-weight: bold" />
+                    </TextFlow>
+                </VBox>
+
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="BOTTOM_LEFT">
+                    <padding><Insets top="30" right="0" bottom="0" left="0"/></padding>
+                    <TextFlow>
+                        <Text fx:id="pop" style="-fx-fill: white" />
+                    </TextFlow>
+                    <Text fx:id="popAmount" style="-fx-fill: white" />
+                    <TextFlow>
+                        <padding><Insets top="-6" right="0" bottom="0" left="0"/></padding>
+                        <Text fx:id="popEstimate" style="-fx-fill: white; -fx-font-weight: bold" />
+                    </TextFlow>
+                </VBox>
+
+                <VBox GridPane.columnIndex="1">
+                    <padding><Insets top="0" right="30" bottom="0" left="30"/></padding>
+                </VBox>
+
+                <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" alignment="TOP_LEFT">
+                    <TextFlow>
+                        <Text fx:id="timeTitle" style="-fx-fill: white" />
+                    </TextFlow>
+                    <Text fx:id="time" style="-fx-fill: white" />
+                    <TextFlow>
+                        <padding><Insets top="-6" right="0" bottom="0" left="0"/></padding>
+                        <Text fx:id="date" style=" -fx-fill: white; -fx-font-weight: bold;" />
+                    </TextFlow>
+                </VBox>
+
+                <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" alignment="BOTTOM_LEFT" prefWidth="-Infinity">
+                    <TextFlow>
+                        <Text fx:id="untilSunsetSunrise" style="-fx-fill: white; "/>
+                    </TextFlow>
+                    <Text fx:id="timeUntilSunsetSunrise" style="-fx-fill: white; " />
+                    <TextFlow>
+                        <padding><Insets top="-6" right="0" bottom="0" left="0"/></padding>
+                        <Text text="" />
+                    </TextFlow>
+                </VBox>
+
+        </GridPane>
+
+            <GridPane alignment="BASELINE_CENTER">
+                <ProgressIndicator fx:id="progress"/>
+            </GridPane>
+
+        </StackPane>
+    </center>
+
+</BorderPane>
