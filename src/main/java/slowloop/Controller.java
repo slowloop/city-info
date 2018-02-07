@@ -25,7 +25,7 @@ public class Controller{
 
     public TextField city, country;
     public Text description, temp, time, popAmount, pop, tempTitle, timeTitle, date,
-    tempDescr, title, popEstimate, untilSunsetSunrise, timeUntilSunsetSunrise;
+            tempDescr, title, popEstimate, untilSunsetSunrise, timeUntilSunsetSunrise;
     public Rectangle border;
     public Button button;
     public BorderPane bPane;
@@ -47,9 +47,7 @@ public class Controller{
 
                     ui.getLongLat(cityName, countryN);
 
-                    if (ui.wikiConnect(cityName).equals("") || !(ui.locationType.equalsIgnoreCase("locality"))
-                            && !(ui.wikiConnect(cityName).contains(ui.longName)) || ui.locationType.equals("")
-                            ||  !(ui.countryName.equalsIgnoreCase(countryN.replace("+", "_")))) {
+                    if (ui.wikiConnect().equals("") || ui.longName.equals("") || !(ui.countryName.equalsIgnoreCase(countryN.replace("+", "_")))) {
 
                         alertBox();
 
@@ -75,9 +73,7 @@ public class Controller{
 
                 ui.getLongLat(cityName, countryN);
 
-                if (ui.wikiConnect(cityName).equals("") || !(ui.locationType.equalsIgnoreCase("locality"))
-                        && !(ui.wikiConnect(cityName).contains(ui.longName)) || ui.locationType.equals("")
-                        ||  !(ui.countryName.equalsIgnoreCase(countryN.replace("+", "_")))) {
+                if (ui.wikiConnect().equals("") || ui.longName.equals("") || !(ui.countryName.equalsIgnoreCase(countryN.replace("+", "_")))) {
 
                     alertBox();
 
@@ -125,20 +121,40 @@ public class Controller{
     public void search(UserInterface text) throws Exception{
         UserInterface ui = text;
 
-        ui.getTimeZone();
-        ui.weather();
-        ui.cityPopulation();
+        try{
+            ui.getTimeZone();
+            ui.weather();
+            ui.cityPopulation();
 
-        Task task = new Task() {
-            @Override
-            protected Object call() throws Exception {
-                titleAndDescription();
-                tempAndPopulation();
-                timeAndSunsetSunrise();
-                return null;
-            }
-        };
-        new Thread(task).start();
+            Task task = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    titleAndDescription();
+                    tempAndPopulation();
+                    timeAndSunsetSunrise();
+                    return null;
+                }
+            };
+            new Thread(task).start();
+
+        }catch (Exception e){
+
+            //If the Wolfram Alpha API is unavailable then exclude it from search.
+            //This prevents an infinite loading loop.
+            ui.getTimeZone();
+            ui.weather();
+
+            Task task = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    titleAndDescription();
+                    tempAndPopulation();
+                    timeAndSunsetSunrise();
+                    return null;
+                }
+            };
+            new Thread(task).start();
+        }
     }
 
     public void titleAndDescription() throws Exception{
@@ -146,27 +162,47 @@ public class Controller{
         title.setFont(Font.loadFont(getClass().getResource("/fonts/SourceSansPro-SemiBold.ttf").toString(), 30));
 
         //If length of the city name is longer than 13 characters then start on a new line
-        if(cityName.length() > 13){
+        if(ui.cityTitle.length() > 13){
             StringBuilder longCityName = new StringBuilder();
             int count = 0;
 
-            for(char letter : cityName.toCharArray()){
-                if(Character.toString(letter).equals("_") && count == cityName.lastIndexOf("_")){
-                    longCityName.append("\n");
-                    continue;
+            for(char letter : ui.cityTitle.toCharArray()){
+
+                if(Character.toString(letter).equals(" ") && count == ui.cityTitle.lastIndexOf(" ")){
+
+                    if(count > 13){
+                        int position = 0;
+                        boolean newLine = false;
+
+                        for(char letters : longCityName.toString().toCharArray()){
+                            position++;
+
+                            if(Character.toString(letters).equals(" ") && position < count && position > 8 && newLine == false){
+
+                                longCityName.replace(position, position, "\n");
+                                count = 0;
+                                newLine = true;
+                            }
+                        }
+                    }else{
+                        longCityName.append("\n");
+                        count = 0;
+                        continue;
+                    }
                 }
-                if(count == 8 && !(cityName.contains("_"))){
+                if(count == 8 && !(ui.cityTitle.contains(" "))){
                     longCityName.append(letter + "-" + "\n");
+                    count = 0;
                 }
                 else{
                     longCityName.append(letter);
                 }
                 count++;
             }
-            title.setText(longCityName.toString().replace("_", " "));
+            title.setText(longCityName.toString());
             title.setFill(Color.WHITE);
         }else{
-            title.setText(cityName.replace("_", " "));
+            title.setText(ui.cityTitle);
             title.setFill(Color.WHITE);
         }
 
@@ -176,7 +212,7 @@ public class Controller{
         border.setFill(Color.WHITE);
 
         //City description
-        ui.cityDescription(cityName, description);
+        ui.cityDescription(description);
     }
 
     public void tempAndPopulation() throws Exception{
@@ -187,11 +223,19 @@ public class Controller{
         temp.setFont(Font.loadFont(getClass().getResource("/fonts/SourceSansPro-SemiBold.ttf").toString(), 40));
         tempDescr.setText(ui.tempDescription);
 
-        //City population
-        pop.setText("POPULATION");
-        popAmount.setFont(Font.loadFont(getClass().getResource("/fonts/SourceSansPro-SemiBold.ttf").toString(), 40));
-        ui.getPopulationNumber(popAmount);
-        popEstimate.setText(ui.popEstimate);
+        if(ui.pop == null){
+            //City population. If the pop variable in the UserInterface class is null then population text is set to "n/a".
+            pop.setText("POPULATION");
+            popAmount.setFont(Font.loadFont(getClass().getResource("/fonts/SourceSansPro-SemiBold.ttf").toString(), 40));
+            popAmount.setText("n/a");
+            popEstimate.setText("");
+
+        }else{
+            pop.setText("POPULATION");
+            popAmount.setFont(Font.loadFont(getClass().getResource("/fonts/SourceSansPro-SemiBold.ttf").toString(), 40));
+            ui.getPopulationNumber(popAmount);
+            popEstimate.setText(ui.popEstimate);
+        }
     }
 
     public void timeAndSunsetSunrise(){
