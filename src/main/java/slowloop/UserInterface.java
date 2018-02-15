@@ -79,7 +79,8 @@ public class UserInterface extends Application {
                     if(location.results.get(0).address_components.get(i).types.get(a).equalsIgnoreCase("locality")||
                             location.results.get(0).address_components.get(i).types.get(a).equalsIgnoreCase("administrative_area_level_2") && longName.equals("")){
 
-                        longName = location.results.get(0).address_components.get(i).long_name;
+                        longName = (location.results.get(0).address_components.get(i).long_name).replace(" District", "")
+                                .replace(" Territory", "").replace(" Precinct", "").replace(" Region", "");
 
                     }
                     if(location.results.get(0).address_components.get(i).types.get(a).equalsIgnoreCase("administrative_area_level_1")){
@@ -275,7 +276,7 @@ public class UserInterface extends Application {
         }
         else{
             //If more than one result is given then grab the relevant data.
-            if(wr.queryresult.pods.get(1).subpods.get(0).plaintext.contains(countryName)){
+            if(wr.queryresult.pods.get(1).subpods.get(0).plaintext.contains(countryName) && wr.queryresult.pods.get(1).subpods.get(0).plaintext.contains("|")){
 
                 String wolframText = wr.queryresult.pods.get(1).subpods.get(0).plaintext
                         .substring(wr.queryresult.pods.get(1).subpods.get(0).plaintext.indexOf(countryName),
@@ -285,6 +286,7 @@ public class UserInterface extends Application {
             }
             else{
                 pop = wr.queryresult.pods.get(1).subpods.get(0).plaintext;
+
             }
 
             //If the population estimate date includes the full date (day, month, year) as opposed to just the year then remove the day to save space.
@@ -334,6 +336,7 @@ public class UserInterface extends Application {
                         }
                     }
                 }
+
                 text.setText(populationNum.toString());
 
             }catch(Exception e){
@@ -405,36 +408,39 @@ public class UserInterface extends Application {
         int first = 0;
         int count = 0;
 
-        for(char letter : city.toCharArray()){
-            count++;
+        try{
+            for(char letter : city.toCharArray()){
+                count++;
 
-            if(Character.toString(letter).equalsIgnoreCase("+")){
-                aCity.append(letter);
-                plus = true;
-                continue;
-            }
-            if(plus == true){
+                if(Character.toString(letter).equalsIgnoreCase("+")){
+                    aCity.append(letter);
+                    plus = true;
+                    continue;
+                }
+                if(plus == true){
 
-                //Don't capitalize words that shouldn't be capitalized.
-                if(Character.toString(letter).equalsIgnoreCase("d") && Character.toString(city.charAt(count+1)).equalsIgnoreCase("+") ||
-                        Character.toString(letter).equalsIgnoreCase("l") && Character.toString(city.charAt(count+1)).equalsIgnoreCase("+")
-                        || Character.toString(city.charAt(count)).equalsIgnoreCase("+")){
+                    //Don't capitalize words that shouldn't be capitalized.
+                    if(Character.toString(letter).equalsIgnoreCase("d") && Character.toString(city.charAt(count+1)).equalsIgnoreCase("+") ||
+                            Character.toString(letter).equalsIgnoreCase("l") && Character.toString(city.charAt(count+1)).equalsIgnoreCase("+")
+                            || Character.toString(city.charAt(count)).equalsIgnoreCase("+")){
 
+                        aCity.append(Character.toString(letter).toLowerCase());
+                    }
+                    else{
+                        aCity.append(Character.toString(letter).toUpperCase());
+                    }
+                    plus = false;
+                    continue;
+                }
+                if(first == 0){
+                    aCity.append(Character.toString(letter).toUpperCase());
+                    first++;
+                }
+                else {
                     aCity.append(Character.toString(letter).toLowerCase());
                 }
-                else{
-                    aCity.append(Character.toString(letter).toUpperCase());
-                }
-                plus = false;
-                continue;
             }
-            if(first == 0){
-                aCity.append(Character.toString(letter).toUpperCase());
-                first++;
-            }
-            else {
-                aCity.append(Character.toString(letter).toLowerCase());
-            }
+        }catch(Exception e){
         }
 
         return aCity.toString().replace("+", "_");
@@ -491,22 +497,26 @@ public class UserInterface extends Application {
             limit = wiki.size();
         }
 
-        for (int i = 0; i < limit; i++) {
+        try{
+            for(int i = 0; i < limit; i++) {
 
-            if (found == false && wiki.get(i).text().length() > city.length() && !(wiki.get(i).toString().contains("<p><a"))
-                    && !(wiki.get(i).toString().contains("Motto:")) && !(wiki.get(i).toString().contains("Sources:")) && !(wiki.get(i).toString().contains("Nickname"))
-                    && wiki.get(i).text().contains(" ")) {
+                if (found == false && wiki.get(i).text().length() > city.length() && !(wiki.get(i).toString().contains("<p><a"))
+                        && !(wiki.get(i).toString().contains("Motto")) && !(wiki.get(i).toString().contains("Sources")) && !(wiki.get(i).toString().contains("Nickname"))
+                        && !(wiki.get(i).toString().contains("Coordinates")) && wiki.get(i).text().length() > 40) {
 
-                //Remove certain words and characters from the wiki description.
-                cityDescription = wiki.get(i).text().replaceAll("\\[[a-z]+]", "").replaceAll("\\[\\d*]", "")
-                        .replaceAll("\\[note\\W[0-9+]]", "").replaceAll("\\W\\(\\Wlisten\\)", "")
-                        .replaceAll("\\W\\(\\Wlisten\\W\\(help.info\\)\\)", "").replaceAll("\\W\\(\\Wpronunciation\\W\\(help.info\\)\\)", "").
-                                replaceAll("\\W\\Wlisten\\W\\(help.info\\)", "").replaceAll("\\W\\Wpronunciation\\W\\(help.info\\)", "");
+                    //Remove certain words and characters from the wiki description.
+                    cityDescription = wiki.get(i).text().replaceAll("\\[[a-z]+]", "").replaceAll("\\[\\d*]", "")
+                            .replaceAll("\\[note\\W[0-9+]]", "").replaceAll("\\W\\(\\Wlisten\\)", "")
+                            .replaceAll("\\W\\(\\Wlisten\\W\\(help.info\\)\\)", "").replaceAll("\\W\\(\\Wpronunciation\\W\\(help.info\\)\\)", "").
+                                    replaceAll("\\W\\Wlisten\\W\\(help.info\\)", "").replaceAll("\\W\\Wpronunciation\\W\\(help.info\\)", "");
 
-                cityTitle = city;
-                found = true;
+                    cityTitle = city;
+                    found = true;
+                }
             }
+        }catch(Exception e){
         }
+
         return cityDescription;
     }
 
@@ -518,45 +528,58 @@ public class UserInterface extends Application {
 
         int count = 0;
         int a = 0;
-        for(Character letter : wiki) {
-            a++;
-            if(Character.toString(letter).equals(".") && count != 1){
-                wikiDescription.append(letter);
-                continue;
-            }
-            else if (Character.toString(letter).matches("\\s") && count != 1 && wikiDescription.toString().endsWith(".")
-                    && Character.toString(wiki[a]).equals(Character.toString(wiki[a]).toUpperCase())){
-                wikiDescription.append(letter);
-                count++;
-            }
-            else if(count != 1){
-                wikiDescription.append(letter);
-            }
-        }
 
-        //If the length of the sentence is greater than 260 characters then just use up until the last comma in the
-        //sentence. If necessary, loop this until below 260 characters.
-        if(wikiDescription.toString().length() > 260){
+        try{
+            for(Character letter : wiki) {
+                a++;
 
-            String shortDescription = wikiDescription.toString();
-            boolean underLimit = false;
+                if(Character.toString(letter).equals(".") && count != 1){
+                    wikiDescription.append(letter);
+                    continue;
+                }
+                else if (Character.toString(letter).matches("\\s") && count != 1 && wikiDescription.toString().endsWith(".")
+                        && Character.toString(wiki[a]).equals(Character.toString(wiki[a]).toUpperCase())
+                        && !(Character.toString(wiki[a-4]).equals("S")) && !(Character.toString(wiki[a-3]).equals("t"))
+                        && !(Character.toString(wiki[a-5]).equals(" "))){
 
-            while(underLimit != true){
-
-                String shorterDescription = shortDescription.substring(0, shortDescription.lastIndexOf(",")) + ".";
-
-                if(shorterDescription.length() > 260){
-
-                    shortDescription = shorterDescription;
-
-                }else{
-                    description.setText(shorterDescription);
-                    underLimit = true;
+                    if(wikiDescription.toString().contains(")") || !(wikiDescription.toString().contains("("))){
+                        wikiDescription.append(letter);
+                        count++;
+                    }else{
+                        wikiDescription.append(letter);
+                        continue;
+                    }
+                }
+                else if(count != 1){
+                    wikiDescription.append(letter);
                 }
             }
-        }
-        else{
-            description.setText(wikiDescription.toString());
+
+            //If the length of the sentence is greater than 260 characters then just use up until the last comma in the
+            //sentence. If necessary, loop this until below 260 characters.
+            if(wikiDescription.toString().length() > 260){
+
+                String shortDescription = wikiDescription.toString();
+                boolean underLimit = false;
+
+                while(underLimit != true){
+
+                    String shorterDescription = shortDescription.substring(0, shortDescription.lastIndexOf(",")) + ".";
+
+                    if(shorterDescription.length() > 260){
+
+                        shortDescription = shorterDescription;
+
+                    }else{
+                        description.setText(shorterDescription);
+                        underLimit = true;
+                    }
+                }
+            }
+            else{
+                description.setText(wikiDescription.toString());
+            }
+        }catch(Exception e){
         }
     }
 }
