@@ -166,39 +166,43 @@ public class Controller{
             StringBuilder longCityName = new StringBuilder();
             int count = 0;
 
-            for(char letter : ui.cityTitle.toCharArray()){
+            try{
+                for(char letter : ui.cityTitle.toCharArray()){
 
-                if(Character.toString(letter).equals(" ") && count == ui.cityTitle.lastIndexOf(" ")){
+                    if(Character.toString(letter).equals(" ") && count == ui.cityTitle.lastIndexOf(" ")){
 
-                    if(count > 13){
-                        int position = 0;
-                        boolean newLine = false;
+                        if(count > 13){
+                            int position = 0;
+                            boolean newLine = false;
 
-                        for(char letters : longCityName.toString().toCharArray()){
-                            position++;
+                            for(char letters : longCityName.toString().toCharArray()){
+                                position++;
 
-                            if(Character.toString(letters).equals(" ") && position < count && position > 8 && newLine == false){
+                                if(Character.toString(letters).equals(" ") && position < count && position > 8 && newLine == false){
 
-                                longCityName.replace(position, position, "\n");
-                                count = 0;
-                                newLine = true;
+                                    longCityName.replace(position, position, "\n");
+                                    count = 0;
+                                    newLine = true;
+                                }
                             }
+                        }else{
+                            longCityName.append("\n");
+                            count = 0;
+                            continue;
                         }
-                    }else{
-                        longCityName.append("\n");
-                        count = 0;
-                        continue;
                     }
+                    if(count == 8 && !(ui.cityTitle.contains(" "))){
+                        longCityName.append(letter + "-" + "\n");
+                        count = 0;
+                    }
+                    else{
+                        longCityName.append(letter);
+                    }
+                    count++;
                 }
-                if(count == 8 && !(ui.cityTitle.contains(" "))){
-                    longCityName.append(letter + "-" + "\n");
-                    count = 0;
-                }
-                else{
-                    longCityName.append(letter);
-                }
-                count++;
+            }catch(Exception e){
             }
+
             title.setText(longCityName.toString());
             title.setFill(Color.WHITE);
         }else{
